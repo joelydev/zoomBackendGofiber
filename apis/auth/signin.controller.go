@@ -115,8 +115,8 @@ func signIn(ctx *fiber.Ctx) error {
 		Data: fiber.Map{
 			"token":         token,
 			"user":          userRecord,
-			"proxyUsername": "admin",
-			"proxyPassword": "admin",
+			"proxyUsername": "ici",
+			"proxyPassword": "ici",
 		},
 	})
 }

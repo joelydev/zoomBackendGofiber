@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"time"
+
 	// "fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -97,7 +98,7 @@ func main() {
 	}
 
 	// launch the app
-	launchError := app.Listen(":" + port)
+	launchError := app.Listen("0.0.0.0:" + port)
 	if launchError != nil {
 		panic(launchError)
 	}

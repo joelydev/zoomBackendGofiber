@@ -1,25 +1,24 @@
 package websocket
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
+	. "go-fiber-auth/database"
+	. "go-fiber-auth/database/schemas"
 	"log"
 	"os"
 	"time"
-	"context"
 
+	// Import the encoding/json package
 
-	. "go-fiber-auth/database"
-	. "go-fiber-auth/database/schemas"
-
-	"github.com/gofiber/websocket/v2"
 	"go-fiber-auth/utilities"
 
+	"github.com/gofiber/websocket/v2"
 )
 
 // Upgraded websocket request
 func handleWebsocket(c *websocket.Conn) {
-	
 
 	var videoFile *os.File
 	for {
@@ -28,20 +27,29 @@ func handleWebsocket(c *websocket.Conn) {
 			log.Println("read:", err)
 			break
 		}
-		
+
 		if string(msg) == "start_recording" {
-			file, err := os.Create(fmt.Sprintf("./static/video/%d.webm", time.Now().Unix()))
+			// userName := strings.Replace(string(msg), "start_recording", "", -1)
+			timestamp := time.Now().Format("2006-01-02_15-04-05")
+			// userName := "admin"
+			filePath := fmt.Sprintf("./static/video/%s.webm", "khpdev"+"-"+string(timestamp))
+			file, err := os.Create(filePath)
 			if err == nil {
 				videoFile = file
 				c.WriteMessage(websocket.TextMessage, []byte("accepted_recording"))
 				fmt.Println("start_recording_after")
+			} else {
+				fmt.Println("Error creating file:", err)
+				// Handle the error, perhaps by sending an error response to the client
+				return
 			}
 
 			now := utilities.MakeTimestamp()
-			
+
 			VideoFileLogCollection := Instance.Database.Collection("Videofilelog")
 			VideoFileLog := new(Videofilelog)
-			VideoFileLog.FileName = fmt.Sprintf("./static/video/%d.webm", time.Now().Unix())
+
+			VideoFileLog.FileName = fmt.Sprintf(filePath)
 			VideoFileLog.Created = now
 			VideoFileLog.Updated = now
 			_, insertionError := VideoFileLogCollection.InsertOne(context.Background(), VideoFileLog)
@@ -50,7 +58,14 @@ func handleWebsocket(c *websocket.Conn) {
 			}
 
 		} else if string(msg) == "stop_recording" {
-			videoFile.Close()
+			if videoFile != nil {
+				videoFile.Close()
+			} else {
+				fmt.Println("No active recording to stop")
+				// Handle the error, perhaps by sending an error response to the client
+				return
+			}
+
 			now := utilities.MakeTimestamp()
 			VideoFileLogCollection := Instance.Database.Collection("Videofilelog")
 			VideoFileLog := new(Videofilelog)
@@ -61,11 +76,19 @@ func handleWebsocket(c *websocket.Conn) {
 			}
 		} else {
 			decodedBytes, err := base64.StdEncoding.DecodeString(string(msg))
-			if err == nil {
+			if err != nil {
+				fmt.Println("Error decoding message:", err)
+				// Handle the error, perhaps by sending an error response to the client
+				return
+			}
+
+			if videoFile != nil {
 				videoFile.Write(decodedBytes)
+			} else {
+				fmt.Println("No active recording to write to")
+				// Handle the error, perhaps by sending an error response to the client
+				return
 			}
 		}
 	}
 }
-
-
