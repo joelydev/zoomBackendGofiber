@@ -13,6 +13,14 @@ import (
 	. "go-fiber-auth/database"
 	. "go-fiber-auth/database/schemas"
 	"go-fiber-auth/utilities"
+
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+
+	"encoding/base64"
+
+	"io"
 )
 
 // Handle signing in
@@ -115,8 +123,32 @@ func signIn(ctx *fiber.Ctx) error {
 		Data: fiber.Map{
 			"token":         token,
 			"user":          userRecord,
-			"proxyUsername": "ici",
-			"proxyPassword": "ici",
+			"proxyUsername": os.Getenv("PROXY_USER_NAME"),
+			"proxyPassword": os.Getenv("PROXY_USER_PASS"),
+			"proxyScheme":   os.Getenv("PROXY_SCHEME"),
+			"proxyServerIp": os.Getenv("PROXY_SERVER_IP"),
+			"proxyPort":     os.Getenv("PROXY_PORT"),
 		},
 	})
+}
+
+func encryptData(dataToEncrypt string, keyString string) (string, error) {
+	key := []byte(keyString)
+	plaintext := []byte(dataToEncrypt)
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return "", err
+	}
+
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
+
+	return base64.URLEncoding.EncodeToString(ciphertext), nil
 }
