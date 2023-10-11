@@ -19,7 +19,9 @@ import (
 	"go-fiber-auth/apis/auth"
 	"go-fiber-auth/apis/chat"
 	"go-fiber-auth/apis/index"
+	"go-fiber-auth/apis/proxy"
 	"go-fiber-auth/apis/websocket"
+
 	"go-fiber-auth/configuration"
 	"go-fiber-auth/database"
 	"go-fiber-auth/utilities"
@@ -68,6 +70,7 @@ func main() {
 	chat.Setup(app)
 	index.Setup(app)
 	websocket.Setup(app)
+	proxy.Setup(app)
 
 	// app.Post("/post", func(c *fiber.Ctx) error {
 	// 	payload := struct {

@@ -18,6 +18,6 @@ func Setup(app *fiber.App) {
 	// 	}
 	// 	return fiber.ErrUpgradeRequired
 	// })
-	
+
 	group.Get("/", websocket.New(handleWebsocket))
 }

@@ -1,16 +1,17 @@
 package configuration
 
 type ResponseMessagesStruct struct {
-	AccessDenied        string
-	EmailAlreadyInUse   string
-	InternalServerError string
-	InvalidData         string
-	InvalidToken        string
-	MissingData         string
-	MissingToken        string
-	NotFound            string
-	Ok                  string
-	TooManyRequests     string
+	AccessDenied         string
+	EmailAlreadyInUse    string
+	InternalServerError  string
+	InvalidData          string
+	InvalidToken         string
+	MissingData          string
+	MissingToken         string
+	NotFound             string
+	Ok                   string
+	TooManyRequests      string
+	ProxyNodeServerError string
 }
 
 type RolesStruct struct {
