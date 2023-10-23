@@ -59,6 +59,7 @@ func handleWebsocket(c *websocket.Conn) {
 
 		} else if string(msg) == "stop_recording" {
 			if videoFile != nil {
+				fmt.Println("stop_recording")
 				videoFile.Close()
 			} else {
 				fmt.Println("No active recording to stop")
